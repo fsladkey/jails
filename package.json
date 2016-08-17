@@ -4,14 +4,16 @@
   "description": "",
   "main": "db_connection.js",
   "scripts": {
+    "start": "node config/app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node config/app.js"
+    "console": "node config/console.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "only": "0.0.2",
-    "pg": "^6.1.0"
+    "pg": "^6.1.0",
+    "require-all": "^2.0.0"
   }
 }

@@ -1,16 +1,19 @@
 const http = require('http')
 const Models = require('../orm/models')
-const User = require('../app/models/user')
+const Router = require('../router')
+
 const port = 3000
 
-const router = (request, response) => {
-  User.new({username: "fsladkey"})
-  response.end(JSON.stringify(User.new({username: "fsladkey"}))
+const handleRequest = (request, response) => {
+  Router.run(request, response, {})
 }
 
-const server = http.createServer(router)
+const server = http.createServer(handleRequest)
 
 Models._load(() => {
+  // define routes
+  require('../config/routes')
+
   server.listen(port, (err) => {
     if (err) {
       return console.log('Error:', err)

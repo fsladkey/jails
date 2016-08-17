@@ -19,10 +19,12 @@ const Models = {
         loaded += 1
         if (loaded === this.models.length) {
           cb()
+          return;
         }
       })
 
     })
+    cb();
   }
 
 }

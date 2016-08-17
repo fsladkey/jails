@@ -3,29 +3,6 @@ const dbConnection = require('./db_connection')
 
 class SQLObject {
 
-  static getColumns() {
-    const query = `
-      SELECT
-        column_name from information_schema.columns
-      WHERE
-        table_name = '${ this.tableName() }';
-    `
-    return dbConnection.query(query)
-      .catch(err => {
-        console.log(err);
-      }).then((result) => result.rows)
-      .then((result) => result.map(entry => {
-        return entry.column_name
-      }))
-      .then(cols => this.columns = cols)
-      .then(cols => cols.forEach(col => {
-        this.prototype[col] = function () {
-          return this.attributes[col]
-        }
-      })
-    )
-  }
-
   static all() {
     const query = `
       SELECT
@@ -33,10 +10,7 @@ class SQLObject {
       FROM
         ${ this.tableName() }
     `
-    return dbConnection.query(query)
-      .catch(err => {
-        console.log(err);
-      }).then(result => result.rows)
+    return this._query(query)
   }
 
   static where(whereStatement) {
@@ -48,10 +22,7 @@ class SQLObject {
       WHERE
         ${whereStatement}
     `
-    return dbConnection.query(query)
-      .catch(err => {
-        console.log(err);
-      }).then(result => result.rows)
+    return this._query(query)
   }
 
   static find(id) {
@@ -65,11 +36,9 @@ class SQLObject {
       LIMIT
         1;
     `
-    return dbConnection.query(query)
-      .catch(err => {
-        console.log(err);
-      }).then((result) => result.rows[0])
-    }
+    return this._query(query)
+      .then(rows => rows[0] || null)
+  }
 
   static first(id) {
     const query = `
@@ -80,23 +49,86 @@ class SQLObject {
       LIMIT
         1;
     `
-    return dbConnection.query(query)
-      .catch(err => {
-        console.log(err);
-      }).then((result) => result.rows[0])
-    }
-
-  static _load(cb) {
-    this.getColumns()
-      .then(() => cb())
+    return this._query(query)
+      .then(rows => rows[0] || null)
   }
-
+  // meh
   static new(options) {
     return new this(options)
   }
 
   static create(options) {
     return new this(options).save
+  }
+
+  static hasMany(name, options) {
+    this.prototype[name] = function () {
+      const query = `
+        SELECT
+          *
+        FROM
+          ${options.tableName}
+        WHERE
+          ${options.foreignKey} = ${this[options.primaryKey]()};
+      `
+      console.log(query);
+      return this.constructor._query(query)
+    }
+  }
+
+  static belongs_to(name, options) {
+    this.prototype[name] = function () {
+      const query = `
+        SELECT
+          *
+        FROM
+          ${options.tableName}
+        WHERE
+          ${options.primaryKey} = ${this[options.foreignKey]}
+        LIMIT
+          1;
+      `
+      return this.constructor._query(query)
+        .then(rows => rows[0] || null)
+    }
+  }
+
+  static _query(query) {
+    return dbConnection.query(query)
+      .catch(err => console.error(err))
+      .then((result) => result.rows)
+      .then((rows) => {
+        return rows.map(row => new this(row))
+      })
+  }
+
+  static _load(cb) {
+    this._getColumns()
+    .catch(err => console.error(err))
+    .then(() => cb())
+  }
+
+
+  static _getColumns() {
+    const query = `
+      SELECT
+        column_name from information_schema.columns
+      WHERE
+        table_name = '${ this.tableName() }';
+    `
+    return dbConnection.query(query)
+      .catch(err => {
+        console.error(err);
+      }).then((result) => result.rows.map(entry => {
+        return entry.column_name
+      }))
+      .then(cols => this.columns = cols)
+      .then(cols => cols.forEach(col => {
+        this.prototype[col] = function () {
+          return this.attributes[col]
+        }
+      })
+    )
   }
 
   constructor(options) {
@@ -116,7 +148,7 @@ class SQLObject {
     return this
   }
 
-  update() {
+  update(options) {
     //
     return this
   }

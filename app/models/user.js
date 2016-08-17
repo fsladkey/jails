@@ -12,4 +12,18 @@ class User extends Models.SQLObject {
   }
 }
 
+User.hasMany("photos", {
+  className: "Photo",
+  tableName: "photos",
+  foreignKey: "user_id",
+  primaryKey: "id"
+})
+
+User.hasMany("comments", {
+  className: "Comment",
+  tableName: "comments",
+  foreignKey: "user_id",
+  primaryKey: "id"
+})
+
 module.exports = Models.addModel(User)
