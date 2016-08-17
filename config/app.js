@@ -1,5 +1,6 @@
 const http = require('http')
 const Models = require('../orm/models')
+require('require-all')(__dirname + '/../app/models')
 const Router = require('../router')
 
 const port = 3000

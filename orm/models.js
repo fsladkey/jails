@@ -13,18 +13,22 @@ const Models = {
   },
 
   _load(cb) {
+    if (this.models.length === 0) {
+      cb()
+      return
+    }
+    
     let loaded = 0
     this.models.forEach(model => {
       model._load(() => {
         loaded += 1
         if (loaded === this.models.length) {
-          cb()
-          return;
+          cb();
+          return
         }
       })
 
     })
-    cb();
   }
 
 }

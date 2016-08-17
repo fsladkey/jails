@@ -52,10 +52,6 @@ class SQLObject {
     return this._query(query)
       .then(rows => rows[0] || null)
   }
-  // meh
-  static new(options) {
-    return new this(options)
-  }
 
   static create(options) {
     return new this(options).save
@@ -71,7 +67,6 @@ class SQLObject {
         WHERE
           ${options.foreignKey} = ${this[options.primaryKey]()};
       `
-      console.log(query);
       return this.constructor._query(query)
     }
   }
@@ -98,14 +93,19 @@ class SQLObject {
       .catch(err => console.error(err))
       .then((result) => result.rows)
       .then((rows) => {
-        return rows.map(row => new this(row))
+        return rows.map(row => {
+          return new this(row)
+        })
       })
   }
 
   static _load(cb) {
     this._getColumns()
     .catch(err => console.error(err))
-    .then(() => cb())
+    .then(() => {
+      this._loaded = true
+      cb()
+    })
   }
 
 
@@ -118,7 +118,7 @@ class SQLObject {
     `
     return dbConnection.query(query)
       .catch(err => {
-        console.error(err);
+        console.error(err)
       }).then((result) => result.rows.map(entry => {
         return entry.column_name
       }))
@@ -154,5 +154,7 @@ class SQLObject {
   }
 
 }
+
+SQLObject._loaded = false
 
 module.exports = SQLObject

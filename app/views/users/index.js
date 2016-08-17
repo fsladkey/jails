@@ -2,7 +2,7 @@ module.exports = function ({ users }) {
   users = users.map(user => {
     return `
       <li>
-        <a href="/users/${user.id}">${user.username}</a>
+        <a href="/users/${user.id()}">${user.username()}</a>
       </li>
       `
   })
