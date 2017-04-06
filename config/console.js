@@ -1,6 +1,5 @@
 const Models = require('../orm/models')
 const User = require('../app/models/user')
-const glob = require( 'glob' )
 const path = require( 'path' )
 const repl = require("repl")
 

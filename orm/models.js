@@ -17,7 +17,7 @@ const Models = {
       cb()
       return
     }
-    
+
     let loaded = 0
     this.models.forEach(model => {
       model._load(() => {
